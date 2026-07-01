@@ -1,0 +1,143 @@
+1. Check Docker
+docker --version
+docker info
+2. Download an image from Docker Hub
+docker pull python:3.12
+
+or
+
+docker pull python:3.12-slim
+3. View downloaded images
+docker images
+
+Example:
+
+REPOSITORY      TAG
+python          3.12
+4. Create a Dockerfile
+
+Example:
+
+FROM python:3.12
+
+WORKDIR /app
+
+COPY . .
+
+CMD ["python", "main.py"]
+5. Build your image
+docker build -t test-app .
+
+Verify:
+
+docker images
+
+Now you'll see:
+
+python:3.12
+test-app:latest
+6. Run a container
+
+Temporary container (deleted after exit):
+
+docker run --rm test-app
+
+Persistent container:
+
+docker run --name myapp test-app
+7. View containers
+
+Running only:
+
+docker ps
+
+All containers:
+
+docker ps -a
+8. Start an existing container
+docker start myapp
+
+Attach to it:
+
+docker start -a myapp
+9. Stop a running container
+docker stop myapp
+10. Remove a container
+docker rm myapp
+11. View logs
+docker logs myapp
+12. Execute commands inside a running container
+docker exec -it myapp bash
+
+or
+
+docker exec -it myapp python
+13. Tag your image for Docker Hub
+
+Suppose your Docker Hub username is nezraal.
+
+docker tag test-app:latest nezraal/test-app:latest
+14. Log in to Docker Hub
+docker login
+15. Push your image
+
+First, create the test-app repository on Docker Hub.
+
+Then:
+
+docker push nezraal/test-app:latest
+16. Pull your image anywhere
+docker pull nezraal/test-app:latest
+17. Run your Docker Hub image
+docker run --rm nezraal/test-app:latest
+18. Remove an image
+docker rmi test-app
+
+or
+
+docker rmi nezraal/test-app:latest
+The complete lifecycle
+Your Python Code
+       │
+       ▼
+Dockerfile
+       │
+docker build
+       ▼
+Docker Image
+       │
+docker run
+       ▼
+Container
+       │
+docker stop
+       ▼
+Stopped Container
+       │
+docker start
+       ▼
+Running Container
+       │
+docker rm
+       ▼
+Container Deleted
+
+To share your application:
+
+Docker Image
+       │
+docker tag
+       ▼
+yourusername/test-app:latest
+       │
+docker push
+       ▼
+Docker Hub
+       │
+docker pull
+       ▼
+Another Computer
+       │
+docker run
+       ▼
+Container
