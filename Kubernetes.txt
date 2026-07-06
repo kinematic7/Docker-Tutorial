@@ -1,0 +1,280 @@
+Change your python code to an API
+
+Convert the python code we saw yesterday with api
+
+PS C:\Users\nezra\DockerTest> uvicorn test:app --host 0.0.0.0 --port 8000
+INFO:     Started server process [8212]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+
+Test if it's working with Swagger, try some get and post commands
+
+INFO:    127.0.0.1:50061 - "GET /docs HTTP/1.1" 200 OK
+INFO:    127.0.0.1:50061 - "GET /openapi.json HTTP/1.1" 200 OK
+
+http://localhost:8000/docs#/
+
+If it's working stop the service and create the image with docker with a version say "v3" 
+In Jenkins, when we build the image v1 is replaced with Jenkins build number
+
+PS C:\Users\nezra\DockerTest> docker build --no-cache -t test-app:v3 .
+[+] Building 20.2s (10/10) FINISHED                                                                docker:desktop-linux
+ => [internal] load build definition from dockerfile                                                               0.0s
+ => => transferring dockerfile: 294B                                                                               0.0s
+ => [internal] load metadata for docker.io/library/python:3.12                                                     0.3s
+ => [internal] load .dockerignore                                                                                  0.0s
+ => => transferring context: 2B                                                                                    0.0s
+ => [1/5] FROM docker.io/library/python:3.12@sha256:a9e4190f02729f01e5b3719bd8b3ea0f8d9350dc17d01a1ce1ca6e3fbfcf7  0.0s
+ => => resolve docker.io/library/python:3.12@sha256:a9e4190f02729f01e5b3719bd8b3ea0f8d9350dc17d01a1ce1ca6e3fbfcf7  0.0s
+ => [internal] load build context                                                                                  0.0s
+ => => transferring context: 64B                                                                                   0.0s
+ => CACHED [2/5] WORKDIR /app                                                                                      0.0s
+ => [3/5] COPY requirements.txt .                                                                                  0.0s
+ => [4/5] RUN pip install --no-cache-dir -r requirements.txt                                                      13.8s
+ => [5/5] COPY test.py .                                                                                           0.1s
+ => exporting to image                                                                                             5.9s
+ => => exporting layers                                                                                            4.5s
+ => => exporting manifest sha256:b5f7263a64476f72b2e4878714a69a2d8b3e98acc06b9ce9c951716afc82a0ed                  0.0s
+ => => exporting config sha256:bc6e60916373ce362fe10434e97683b0c48ff79a7bf56a8bace22cf155f545da                    0.0s
+ => => exporting attestation manifest sha256:f4272df8f286e802135a39f5e5ead1b730146d60700e37cd1d44e17b74b293a4      0.0s
+ => => exporting manifest list sha256:993cb219eb86698388c6a76dc4fb29f5cfda66bb2839b4bf655b5e19c5743b6f             0.0s
+ => => naming to docker.io/library/test-app:v3                                                                     0.0s
+ => => unpacking to docker.io/library/test-app:v3 
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/1fqv6jxoyjvs0qslmjspervzc
+
+Kubernetes Installation
+------------------------
+
+PS C:\users\nezra\DockerTest> Invoke-WebRequest -Uri "https://kind.sigs.k8s.io/dl/v0.26.0/kind-windows-amd64" -OutFile ".\kind.exe"
+
+PS C:\users\nezra\DockerTest> Disable-NetAdapterLso -Name "*" -IPv4
+
+PS C:\users\nezra\DockerTest> docker pull kindest/node:v1.32.0
+v1.32.0: Pulling from kindest/node
+1f38ffa669ec: Pull complete
+05dbfe9aa38f: Pull complete
+Digest: sha256:c48c62eac5da28cdadcf560d1d8616cfa6783b58f0d94cf63ad1bf49600cb027
+Status: Downloaded newer image for kindest/node:v1.32.0
+docker.io/kindest/node:v1.32.0
+
+What's next:
+    View a summary of image vulnerabilities and recommendations → docker scout quickview kindest/node:v1.32.0
+PS C:\users\nezra\DockerTest> docker pull kindest/node:v1.36.1
+v1.36.1: Pulling from kindest/node
+Digest: sha256:3489c7674813ba5d8b1a9977baea8a6e553784dab7b84759d1014dbd78f7ebd5
+Status: Image is up to date for kindest/node:v1.36.1
+docker.io/kindest/node:v1.36.1
+
+What's next:
+    View a summary of image vulnerabilities and recommendations → docker scout quickview kindest/node:v1.36.1
+PS C:\users\nezra\DockerTest> \kind.exe create cluster --image kindest/node:v1.36.1
+\kind.exe : The term '\kind.exe' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name,
+or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ \kind.exe create cluster --image kindest/node:v1.36.1
++ ~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (\kind.exe:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+
+Suggestion [3,General]: The command \kind.exe was not found, but does exist in the current location. Windows PowerShell does not load commands from the current location by default. If you trust this command, instead type: ".\\kind.exe". See "get-help about_Command_Precedence" for more details.
+PS C:\users\nezra\DockerTest> .\kind.exe create cluster --image kindest/node:v1.36.1
+Creating cluster "kind" ...
+ • Ensuring node image (kindest/node:v1.36.1) 🖼  ...
+ ✓ Ensuring node image (kindest/node:v1.36.1) 🖼
+ • Preparing nodes 📦   ...
+ ✓ Preparing nodes 📦
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+Set kubectl context to "kind-kind"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-kind
+
+Have a nice day! 👋
+PS C:\users\nezra\DockerTest>
+
+
+PS C:\users\nezra\DockerTest> kubectl.exe get nodes
+NAME                 STATUS   ROLES           AGE    VERSION
+kind-control-plane   Ready    control-plane   3m4s   v1.36.1
+PS C:\users\nezra\DockerTest>
+
+Type "docker ps" to ensure the docker image version for kind matches your installed Kubernetes versions.
+
+PS C:\Users\nezra\DockerTest> docker ps
+CONTAINER ID   IMAGE                  COMMAND                  CREATED         STATUS         PORTS                       NAMES
+820a3337f5be   kindest/node:v1.36.1   "/usr/local/bin/entr…"   2 minutes ago   Up 2 minutes   127.0.0.1:59204->6443/tcp   kind-control-plane
+
+If you ever need to update it in the future:
+
+PS C:\Users\nezra\DockerTest> Invoke-WebRequest `
+>>     -Uri "https://kind.sigs.k8s.io/dl/latest/kind-windows-amd64" `
+>>     -OutFile "kind.exe"
+
+Delete a cluster:
+
+PS C:\Users\nezra\DockerTest> .\kind.exe delete cluster
+Deleting cluster "kind" ...
+Deleted nodes: ["kind-control-plane"]
+PS C:\Users\nezra\DockerTest>
+
+Recreate Cluster
+
+PS C:\Users\nezra\DockerTest> .\kind.exe create cluster --image kindest/node:v1.36.1
+Creating cluster "kind" ...
+ • Ensuring node image (kindest/node:v1.36.1) 🖼  ...
+ ✓ Ensuring node image (kindest/node:v1.36.1) 🖼
+ • Preparing nodes 📦   ...
+ ✓ Preparing nodes 📦
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+Set kubectl context to "kind-kind"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-kind
+
+Thanks for using kind! 😊
+PS C:\Users\nezra\DockerTest>
+
+===================================================================================================================================
+
+Step 1: See what docker images you have
+
+PS C:\Users\nezra\DockerTest> docker images
+                                                                                                    i Info →   U  In Use
+IMAGE                  ID             DISK USAGE   CONTENT SIZE   EXTRA
+kindest/node:v1.36.1   3489c7674813       1.31GB          383MB    U
+test-app:latest        cfac8a84ff56        1.8GB          455MB
+test-app:v1            f603367e6d7d       1.82GB          460MB
+test-app:v2            a9e4c31eca3c       1.82GB          460MB
+test-app:v3            993cb219eb86       1.82GB          460MB
+Step 2: Load test-app:v1 into Kubernetes
+
+PS C:\Users\nezra\DockerTest>  .\kind load docker-image test-app:v3
+Image: "test-app:v3" with ID "sha256:993cb219eb86698388c6a76dc4fb29f5cfda66bb2839b4bf655b5e19c5743b6f" not yet present on node "kind-control-plane", loading...
+
+PS C:\Users\nezra\DockerTest>
+
+Step 3: Create a deployment file deployment.yaml
+
+Step 4: Clean and create a namespace
+
+PS C:\Users\nezra\DockerTest> kubectl delete deployment test-app
+deployment.apps "test-app" deleted from default namespace
+
+PS C:\Users\nezra\DockerTest> kubectl create namespace prod-env
+namespace/prod-env created
+
+Step 5: Deploy
+
+PS C:\Users\nezra\DockerTest> kubectl apply -f deployment.yaml
+deployment.apps/test-app created
+
+Step 6: See if replicas are running
+
+PS C:\Users\nezra\DockerTest> kubectl get pods -n prod-env
+NAME                        READY   STATUS    RESTARTS   AGE
+test-app-784985dbf7-6dlxd   1/1     Running   0          12m
+test-app-784985dbf7-6xpk6   1/1     Running   0          12m
+test-app-784985dbf7-h2sph   1/1     Running   0          12m
+
+
+Step 7: Expose the ports publicly by creating a service. This is a load balanced Service that distributes traffic on all the replicas!
+
+PS C:\Users\nezra\DockerTest> kubectl delete svc test-app -n prod-env
+service "test-app" deleted from prod-env namespace
+
+PS C:\Users\nezra\DockerTest> kubectl delete svc test-app -n prod-env
+
+PS C:\Users\nezra\DockerTest> kubectl apply -f service-loadbalancer.yaml
+
+service/test-app created
+
+PS C:\Users\nezra\DockerTest> kubectl get svc -n prod-env
+NAME       TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+test-app   LoadBalancer   10.96.199.140   <pending>     8000:31778/TCP   14s
+PS C:\Users\nezra\DockerTest> kubectl port-forward svc/test-app 8000:8000 -n prod-env
+Forwarding from 127.0.0.1:8000 -> 8000
+Forwarding from [::1]:8000 -> 8000
+Handling connection for 8000
+Handling connection for 8000
+
+Step 9: Test with swagger again with some GET and POST commands
+
+http://localhost:8000/docs
+
+OR do a curl command to test
+
+C:\Users\nezra>curl http://localhost:8000/docs
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+
+    ... blah blah blah
+
+
+As you interact in your powershell you will see the HTTP GET and POST requests. In OpenShift you can find them in the logs
+
+test-app   10.244.0.17:8000,10.244.0.18:8000,10.244.0.19:8000   4m10s
+PS C:\Users\nezra\DockerTest> kubectl port-forward deployment/test-app 8000:8000
+Forwarding from 127.0.0.1:8000 -> 8000
+Forwarding from [::1]:8000 -> 8000
+Handling connection for 8000
+Handling connection for 8000
+Handling connection for 8000
+
+
+-- Additional Stuff on Ingress --
+
+Install Ingress
+
+PS C:\Users\nezra\DockerTest> kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/cloud/deploy.yaml
+
+namespace/ingress-nginx created
+serviceaccount/ingress-nginx created
+serviceaccount/ingress-nginx-admission created
+role.rbac.authorization.k8s.io/ingress-nginx created
+role.rbac.authorization.k8s.io/ingress-nginx-admission created
+clusterrole.rbac.authorization.k8s.io/ingress-nginx created
+clusterrole.rbac.authorization.k8s.io/ingress-nginx-admission created
+rolebinding.rbac.authorization.k8s.io/ingress-nginx created
+rolebinding.rbac.authorization.k8s.io/ingress-nginx-admission created
+clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx created
+clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx-admission created
+configmap/ingress-nginx-controller created
+service/ingress-nginx-controller created
+service/ingress-nginx-controller-admission created
+deployment.apps/ingress-nginx-controller created
+job.batch/ingress-nginx-admission-create created
+job.batch/ingress-nginx-admission-patch created
+ingressclass.networking.k8s.io/nginx created
+validatingwebhookconfiguration.admissionregistration.k8s.io/ingress-nginx-admission created
+
+Apply the ingress yaml
+
+PS C:\Users\nezra\DockerTest> kubectl apply -f ingress.yaml
+PS C:\Users\nezra\DockerTest> ubectl get pods -n ingress-nginx
+
+PS C:\Users\nezra\DockerTest> kubectl get ingress
+NAME               CLASS    HOSTS            ADDRESS   PORTS   AGE
+test-app-ingress   <none>   test-app.local             80      4m11s
+
+Now you can test it with an external ip address.

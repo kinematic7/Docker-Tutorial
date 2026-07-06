@@ -1,6 +1,13 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
 import pandas as pd
 
+app = FastAPI()
 
+
+# ----------------------------
+# Your original logic
+# ----------------------------
 class Person:
     def __init__(self, name, age):
         self.name = name
@@ -15,9 +22,7 @@ class Employee(Person):
 
 class EmployeeManager:
     def __init__(self):
-        self.employees = pd.DataFrame(
-            columns=["name", "age", "employee_id"]
-        )
+        self.employees = pd.DataFrame(columns=["name", "age", "employee_id"])
 
     def add_employee(self, employee):
         new_row = pd.DataFrame([{
@@ -26,10 +31,7 @@ class EmployeeManager:
             "employee_id": employee.employee_id
         }])
 
-        self.employees = pd.concat(
-            [self.employees, new_row],
-            ignore_index=True
-        )
+        self.employees = pd.concat([self.employees, new_row], ignore_index=True)
 
     def get_employee_by_id(self, employee_id):
         employee_data = self.employees.loc[
@@ -45,12 +47,10 @@ class EmployeeManager:
         return self.employees.to_dict(orient="records")
 
     def group_employees_by_age(self):
-        age_groups = {
+        return {
             age: group.to_dict(orient="records")
             for age, group in self.employees.groupby("age")
         }
-
-        return age_groups
 
     def delete_employee_by_id(self, employee_id):
         self.employees = self.employees.loc[
@@ -58,22 +58,44 @@ class EmployeeManager:
         ]
 
 
-if __name__ == "__main__":
-    manager = EmployeeManager()
+manager = EmployeeManager()
 
-    emp1 = Employee("Alice", 30, "E001")
-    emp2 = Employee("Bob", 25, "E002")
-    emp3 = Employee("Charlie", 30, "E003")
+# ----------------------------
+# Request Models
+# ----------------------------
+class EmployeeRequest(BaseModel):
+    name: str
+    age: int
+    employee_id: str
 
-    manager.add_employee(emp1)
-    manager.add_employee(emp2)
-    manager.add_employee(emp3)
 
-    print("All Employees:")
-    print(manager.get_all_employees())
+# ----------------------------
+# API Endpoints
+# ----------------------------
 
-    print("\nEmployee By ID:")
-    print(manager.get_employee_by_id("E002"))
+@app.post("/employees")
+def add_employee(emp: EmployeeRequest):
+    employee = Employee(emp.name, emp.age, emp.employee_id)
+    manager.add_employee(employee)
+    return {"message": "Employee added successfully"}
 
-    print("\nEmployees Grouped By Age:")
-    print(manager.group_employees_by_age())
+
+@app.get("/employees")
+def get_all():
+    return manager.get_all_employees()
+
+
+@app.get("/employees/{emp_id}")
+def get_by_id(emp_id: str):
+    return manager.get_employee_by_id(emp_id)
+
+
+@app.get("/employees/grouped/age")
+def group_by_age():
+    return manager.group_employees_by_age()
+
+
+@app.delete("/employees/{emp_id}")
+def delete(emp_id: str):
+    manager.delete_employee_by_id(emp_id)
+    return {"message": "Employee deleted"}
