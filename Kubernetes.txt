@@ -278,3 +278,46 @@ NAME               CLASS    HOSTS            ADDRESS   PORTS   AGE
 test-app-ingress   <none>   test-app.local             80      4m11s
 
 Now you can test it with an external ip address.
+
+
+-----------------------------------
+
+Install Mongo
+
+PS C:\Users\nezra\DockerTest> kubectl apply -f mongo-config-secret.yaml
+
+configmap/mongo-config created
+secret/mongo-secret created
+
+PS C:\Users\nezra\DockerTest> kubectl apply -f mongo-deployment.yaml
+persistentvolumeclaim/mongo-pvc created
+deployment.apps/mongodb created
+service/mongodb-service created
+
+PS C:\Users\nezra\DockerTest> kubectl get all,pvc -n prod-env
+NAME                            READY   STATUS              RESTARTS   AGE
+pod/mongodb-7c6cd56dbd-h7rvx    0/1     ContainerCreating   0          19s
+pod/test-app-784985dbf7-6dlxd   1/1     Running             0          23h
+pod/test-app-784985dbf7-6xpk6   1/1     Running             0          23h
+pod/test-app-784985dbf7-h2sph   1/1     Running             0          23h
+
+NAME                      TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/mongodb-service   ClusterIP      10.96.50.138    <none>        27017/TCP        19s
+service/test-app          LoadBalancer   10.96.199.140   <pending>     8000:31778/TCP   22h
+
+NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/mongodb    0/1     1            0           19s
+deployment.apps/test-app   3/3     3            3           23h
+
+NAME                                  DESIRED   CURRENT   READY   AGE
+replicaset.apps/mongodb-7c6cd56dbd    1         1         0       19s
+replicaset.apps/test-app-784985dbf7   3         3         3       23h
+
+NAME                              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/mongo-pvc   Bound    pvc-4be752b8-9bd5-47e4-9a72-a6e981e01149   10Gi       RWO            standard       <unset>                 19s
+PS C:\Users\nezra\DockerTest> kubectl get pods -n prod-env
+NAME                        READY   STATUS    RESTARTS   AGE
+mongodb-7c6cd56dbd-h7rvx    1/1     Running   0          50s
+test-app-784985dbf7-6dlxd   1/1     Running   0          23h
+test-app-784985dbf7-6xpk6   1/1     Running   0          23h
+test-app-784985dbf7-h2sph   1/1     Running   0          23h
