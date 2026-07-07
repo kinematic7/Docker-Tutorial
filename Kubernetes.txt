@@ -284,10 +284,19 @@ Now you can test it with an external ip address.
 
 Install Mongo
 
+Step 1: Create a base64 password
+
+PS C:\Users\nezra\DockerTest> [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("late2dine"))
+bGF0ZTJkaW5l
+
+Step 2: Create config and secret
+
 PS C:\Users\nezra\DockerTest> kubectl apply -f mongo-config-secret.yaml
 
 configmap/mongo-config created
 secret/mongo-secret created
+
+Step 3: Create volume mount, mongo pod image and mongo service
 
 PS C:\Users\nezra\DockerTest> kubectl apply -f mongo-deployment.yaml
 persistentvolumeclaim/mongo-pvc created
@@ -296,7 +305,7 @@ service/mongodb-service created
 
 PS C:\Users\nezra\DockerTest> kubectl get all,pvc -n prod-env
 NAME                            READY   STATUS              RESTARTS   AGE
-pod/mongodb-7c6cd56dbd-h7rvx    0/1     ContainerCreating   0          19s
+pod/mongodb-7c6cd56dbd-h7rvx    0/1     ContainerCreating   0          19s <= wait to Running State from ContainerCreating
 pod/test-app-784985dbf7-6dlxd   1/1     Running             0          23h
 pod/test-app-784985dbf7-6xpk6   1/1     Running             0          23h
 pod/test-app-784985dbf7-h2sph   1/1     Running             0          23h
@@ -321,3 +330,101 @@ mongodb-7c6cd56dbd-h7rvx    1/1     Running   0          50s
 test-app-784985dbf7-6dlxd   1/1     Running   0          23h
 test-app-784985dbf7-6xpk6   1/1     Running   0          23h
 test-app-784985dbf7-h2sph   1/1     Running   0          23h
+
+Step 5: Log into Mongo
+
+PS C:\Users\nezra\DockerTest> kubectl exec -it deployment/mongodb -n prod-env -- mongosh -u admin -p late2dine
+Current Mongosh Log ID: 6a4c791641361644949df8a2
+Connecting to:          mongodb://<credentials>@127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.8.3
+Using MongoDB:          6.0.28
+Using Mongosh:          2.8.3
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+
+To help improve our products, anonymous usage data is collected and sent to MongoDB periodically (https://www.mongodb.com/legal/privacy-policy).
+You can opt-out by running the disableTelemetry() command.
+
+------
+   The server generated these startup warnings when booting
+   2026-07-07T03:48:11.121+00:00: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem
+   2026-07-07T03:48:11.547+00:00: vm.max_map_count is too low
+------
+
+test> show dbs
+admin   100.00 KiB
+config   12.00 KiB
+local    72.00 KiB
+
+
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+
+To help improve our products, anonymous usage data is collected and sent to MongoDB periodically (https://www.mongodb.com/legal/privacy-policy).
+You can opt-out by running the disableTelemetry() command.
+
+------
+   The server generated these startup warnings when booting
+   2026-07-07T03:48:11.121+00:00: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem
+   2026-07-07T03:48:11.547+00:00: vm.max_map_count is too low
+------
+
+Step 6: Switch to admin
+
+test> use admin
+switched to db admin
+admin> show collections
+system.users
+system.version
+admin> use company
+switched to db company
+company> show dbs
+admin   100.00 KiB
+config   60.00 KiB
+local    72.00 KiB
+
+company> db.employees.insertMany([
+|   { name: "Bob", age: 25, employee_id: "E102" },
+|   { name: "Charlie", age: 35, employee_id: "E103" }
+| ])
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('6a4c7a4f41361644949df8a3'),
+    '1': ObjectId('6a4c7a4f41361644949df8a4')
+  }
+}
+company> db.employees.find()
+[
+  {
+    _id: ObjectId('6a4c7a4f41361644949df8a3'),
+    name: 'Bob',
+    age: 25,
+    employee_id: 'E102'
+  },
+  {
+    _id: ObjectId('6a4c7a4f41361644949df8a4'),
+    name: 'Charlie',
+    age: 35,
+    employee_id: 'E103'
+  }
+]
+
+Step 7: Now forward the port externally
+
+PS C:\Users\nezra\dockertest> kubectl port-forward svc/mongodb-service 27017:27017 -n prod-env
+Forwarding from 127.0.0.1:27017 -> 27017
+Forwarding from [::1]:27017 -> 27017
+
+
+Step 8: Now on a separate powershell use the mongo db to test it
+
+C:\Users\nezra\DockerTest>python mongotest.py
+      name  age employee_id
+0      Bob   25        E102
+1  Charlie   35        E103
+
+C:\Users\nezra\DockerTest>
+
+
